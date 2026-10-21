@@ -1,0 +1,35 @@
+name: Publicar versión
+
+# Se activa cuando llega la rama "subida" con el APK y el instalador en partes.
+# Une el instalador, crea la versión (Releases) y borra la rama.
+on:
+  push:
+    branches: [subida]
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: subida
+      - name: Crear versión
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # La rama se sube en varios envíos; solo se publica cuando llega listo.txt.
+          if [ ! -f listo.txt ]; then echo "Aún faltan partes."; exit 0; fi
+          cat Visnora-Player-Setup.exe.parte* > Visnora-Player-Setup.exe
+          VERSION=$(cat version.txt)
+          if gh release view "v$VERSION" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            gh release upload "v$VERSION" Visnora-Player.apk Visnora-Player-Setup.exe --clobber --repo "${{ github.repository }}"
+          else
+            gh release create "v$VERSION" Visnora-Player.apk Visnora-Player-Setup.exe \
+              --repo "${{ github.repository }}" --target main \
+              --title "Visnora Player $VERSION" \
+              --notes "Android (teléfono, tablet, Android TV y Fire TV) y Windows 10/11 de 64 bits. Visnora Player no incluye canales ni suscripciones."
+          fi
+          git push origin --delete subida
