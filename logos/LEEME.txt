@@ -1,0 +1,2 @@
+Índice de logos de canales por país para Visnora Player (clave: nombre normalizado, valor: URL del logo; "i:" = https://i.imgur.com/).
+Fuente: base pública iptv-org (https://github.com/iptv-org/database), licencia CC0. Se regenera con tools/build_logos.py.
